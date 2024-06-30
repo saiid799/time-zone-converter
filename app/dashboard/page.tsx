@@ -9,5 +9,5 @@ export default function DashboardPage() {
     redirect("/");
   }
 
-  return <Dashboard userId={userId} />;
+  return <Dashboard />;
 }

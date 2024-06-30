@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { TimeZoneSelector } from "./TimeZoneSelector";
 import { CurrentTime } from "./CurrentTime";
 import { TimeConversion } from "./TimeConversion";
@@ -13,16 +14,20 @@ interface Conversion {
   ago: string;
 }
 
-export function Dashboard({ userId }: { userId: string }) {
+export function Dashboard() {
+  const { userId } = useAuth();
   const [selectedTimeZones, setSelectedTimeZones] = useState<string[]>([]);
   const [recentConversions, setRecentConversions] = useState<Conversion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchRecentConversions();
+    if (userId) {
+      fetchRecentConversions();
+    }
   }, [userId]);
 
   const fetchRecentConversions = async () => {
+    if (!userId) return;
     try {
       setIsLoading(true);
       const response = await fetch(`/api/conversions?userId=${userId}`);
@@ -43,6 +48,7 @@ export function Dashboard({ userId }: { userId: string }) {
   };
 
   const handleConvert = async (conversion: Conversion) => {
+    if (!userId) return;
     try {
       const response = await fetch("/api/conversions", {
         method: "POST",
@@ -85,6 +91,10 @@ export function Dashboard({ userId }: { userId: string }) {
       console.error("Error deleting conversion:", error);
     }
   };
+
+  if (!userId) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
